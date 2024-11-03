@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Web Assistant</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>AI Web Assistant</h1>
+      <p class="description">AI-powered summaries and answers</p>
+
+      <div class="tabs">
+        <button class="tab-button active" data-tab="summary">Summarize</button>
+        <button class="tab-button" data-tab="ask">Ask</button>
+      </div>
+
+      <div class="tab-content active" id="summary-tab">
+        <button id="summarize-button">Generate AI Summary</button>
+        <div class="scroll-area">
+          <p id="summary-content"></p>
+        </div>
+      </div>
+
+      <div class="tab-content" id="ask-tab">
+        <div class="input-group">
+          <input
+            type="text"
+            id="question-input"
+            placeholder="Ask AI a question..."
+          />
+          <button id="ask-button">Ask AI</button>
+        </div>
+        <div class="scroll-area">
+          <p id="answer-content"></p>
+        </div>
+      </div>
+
+      <p id="error-message" class="error"></p>
+
+      <form id="feedback-form">
+        <textarea
+          id="feedback-input"
+          placeholder="Provide feedback or report an issue..."
+        ></textarea>
+        <button type="submit" id="feedback-submit">Submit Feedback</button>
+      </form>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
