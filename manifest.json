@@ -6,7 +6,7 @@
   "permissions": ["activeTab", "scripting"],
   "host_permissions": [
     "<all_urls>",
-    "https://your-vercel-deployment-url.vercel.app/"
+    "https://pagesumry-geej78byr-omarbernardot-gmailcoms-projects.vercel.app"
   ],
   "action": {
     "default_popup": "popup.html"

@@ -1,0 +1,29 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Editor Files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Dependency Directories
+node_modules/
+
+# Build Output
+dist/
+build/
+
+# Temporary Files
+*.log
+*.tmp
+
+# Chrome Extension specific
+*.pem
+*.crx
+
+# Personal Configuration
+config.json
+
+extension.zip

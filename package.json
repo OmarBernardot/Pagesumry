@@ -1,0 +1,19 @@
+{
+  "name": "pagesumry",
+  "version": "1.0.0",
+  "description": "",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^5.0.0",
+    "gulp-javascript-obfuscator": "^1.1.6",
+    "gulp-uglify-es": "^3.0.0",
+    "gulp-zip": "^6.0.0",
+    "pump": "^3.0.2"
+  }
+}
