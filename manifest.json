@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AI Web Assistant",
+  "name": "PageSumry",
   "version": "1.0",
-  "description": "AI-powered web page summarization and question answering",
+  "description": "Extension that enables users to either generate a summary of the current webpage or ask any questions regarding that web page",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": [
     "<all_urls>",
