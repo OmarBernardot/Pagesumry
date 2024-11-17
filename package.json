@@ -10,8 +10,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "cssnano": "^7.0.6",
     "gulp": "^5.0.0",
     "gulp-javascript-obfuscator": "^1.1.6",
+    "gulp-postcss": "^10.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-replace": "^1.1.4",
+    "gulp-uglify": "^3.0.2",
     "gulp-uglify-es": "^3.0.0",
     "gulp-zip": "^6.0.0",
     "pump": "^3.0.2"

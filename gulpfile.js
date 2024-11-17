@@ -1,15 +1,19 @@
-const gulp = require("gulp");
+const { src, dest, series, parallel } = require("gulp");
 const uglify = require("gulp-uglify");
 const postcss = require("gulp-postcss");
 const cssnano = require("cssnano");
-const zip = require("gulp-zip");
 const rename = require("gulp-rename");
 const replace = require("gulp-replace");
 
+// We'll use a dynamic import for gulp-zip
+let zip;
+import("gulp-zip").then((module) => {
+  zip = module.default;
+});
+
 // Minify and obfuscate JavaScript using UglifyJS
-gulp.task("js", () => {
-  return gulp
-    .src(["popup.js", "background.js", "content.js"])
+function js() {
+  return src(["popup.js", "background.js", "content.js"])
     .pipe(
       uglify({
         mangle: true,
@@ -33,43 +37,36 @@ gulp.task("js", () => {
       })
     )
     .pipe(rename({ suffix: ".min" }))
-    .pipe(gulp.dest("dist"));
-});
+    .pipe(dest("dist"));
+}
 
 // Minify CSS
-gulp.task("css", () => {
-  return gulp
-    .src("styles.css")
+function css() {
+  return src("styles.css")
     .pipe(postcss([cssnano()]))
     .pipe(rename({ suffix: ".min" }))
-    .pipe(gulp.dest("dist"));
-});
+    .pipe(dest("dist"));
+}
 
 // Copy HTML and manifest
-gulp.task("copy", () => {
-  return gulp
-    .src(["popup.html", "manifest.json", "*.png"])
-    .pipe(gulp.dest("dist"));
-});
+function copy() {
+  return src(["popup.html", "manifest.json", "*.png"]).pipe(dest("dist"));
+}
 
 // Update references in HTML and manifest to minified files
-gulp.task("update-refs", () => {
-  return gulp
-    .src(["dist/popup.html", "dist/manifest.json"])
+function updateRefs() {
+  return src(["dist/popup.html", "dist/manifest.json"])
     .pipe(replace("popup.js", "popup.min.js"))
     .pipe(replace("background.js", "background.min.js"))
     .pipe(replace("content.js", "content.min.js"))
     .pipe(replace("styles.css", "styles.min.css"))
-    .pipe(gulp.dest("dist"));
-});
+    .pipe(dest("dist"));
+}
 
 // Zip the distribution folder
-gulp.task("zip", () => {
-  return gulp
-    .src("dist/**")
-    .pipe(zip("chrome-extension.zip"))
-    .pipe(gulp.dest("."));
-});
+function zipDist() {
+  return src("dist/**").pipe(zip("chrome-extension.zip")).pipe(dest("."));
+}
 
 // Default task
-gulp.task("default", gulp.series("js", "css", "copy", "update-refs", "zip"));
+exports.default = series(parallel(js, css, copy), updateRefs, zipDist);
