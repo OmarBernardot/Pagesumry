@@ -1,64 +1,73 @@
+const { src, dest, series, parallel } = require("gulp");
 const uglifyjs = require("uglify-es");
-const gulp = require("gulp");
 const composer = require("gulp-uglify/composer");
 const pump = require("pump");
-const zip = require("gulp-zip");
+const postcss = require("gulp-postcss");
+const cssnano = require("cssnano");
+
+// We'll use a dynamic import for gulp-zip
+let zip;
+import("gulp-zip").then((module) => {
+  zip = module.default;
+});
 
 const minify = composer(uglifyjs, console);
 
-gulp.task("compress", function (cb) {
-  const options = {
-    mangle: true,
-    compress: {
-      dead_code: true,
-      drop_debugger: true,
-      conditionals: true,
-      evaluate: true,
-      booleans: true,
-      loops: true,
-      unused: true,
-      hoist_funs: true,
-      keep_fargs: false,
-      hoist_vars: true,
-      if_return: true,
-      join_vars: true,
-      cascade: true,
-      side_effects: true,
-      warnings: false,
-    },
-  };
+// Minify and obfuscate JavaScript using uglify-es
+function js(cb) {
+  pump(
+    [
+      src(["popup.js", "background.js", "content.js"]),
+      minify({
+        mangle: true,
+        compress: {
+          dead_code: true,
+          drop_debugger: true,
+          conditionals: true,
+          evaluate: true,
+          booleans: true,
+          loops: true,
+          unused: true,
+          hoist_funs: true,
+          keep_fargs: false,
+          hoist_vars: true,
+          if_return: true,
+          join_vars: true,
+          side_effects: true,
+          warnings: false,
+        },
+      }),
+      zip("PageSumry.zip"),
+      dest("."),
+    ],
+    cb
+  );
+}
 
-  // Minify main JavaScript files
-  pump([
-    gulp.src(["popup.js", "background.js", "content.js"]),
-    minify(options),
-    gulp.dest("dist"),
-  ]);
+// Minify CSS
+function css(cb) {
+  pump(
+    [
+      src("popup.css"),
+      postcss([cssnano()]),
+      zip("PageSumry.zip", { append: true }),
+      dest("."),
+    ],
+    cb
+  );
+}
 
-  // Copy and minify CSS
-  pump([gulp.src("popup.css"), require("gulp-clean-css")(), gulp.dest("dist")]);
+// Copy other necessary files including icons
+function copyOther(cb) {
+  pump(
+    [
+      src(["popup.html", "manifest.json", "icon128.png"]),
+      zip("PageSumry.zip", { append: true }),
+      dest(".chromestore"),
+    ],
+    cb
+  );
+}
 
-  // Copy HTML and manifest
-  gulp.src(["popup.html", "manifest.json"]).pipe(gulp.dest("dist"));
-
-  // Copy icons
-  gulp.src("*.png").pipe(gulp.dest("dist"));
-
-  cb();
-});
-
-gulp.task("zip", () =>
-  gulp
-    .src([
-      "dist/**",
-      "!*.zip",
-      "!node_modules/**",
-      "!node_modules/",
-      "!gulpfile.js",
-      "!package-lock.json",
-    ])
-    .pipe(zip("PageSumry.zip"))
-    .pipe(gulp.dest("."))
-);
-
-gulp.task("default", gulp.series("compress", "zip"));
+// Default task
+exports.default = series(js, css, copyOther);
