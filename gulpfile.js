@@ -4,6 +4,7 @@ const composer = require("gulp-uglify/composer");
 const pump = require("pump");
 const postcss = require("gulp-postcss");
 const cssnano = require("cssnano");
+const replace = require("gulp-replace");
 
 // We'll use a dynamic import for gulp-zip
 let zip;
@@ -37,8 +38,7 @@ function js(cb) {
           warnings: false,
         },
       }),
-      zip("PageSumry.zip"),
-      dest("."),
+      dest("dist"),
     ],
     cb
   );
@@ -46,28 +46,30 @@ function js(cb) {
 
 // Minify CSS
 function css(cb) {
+  pump([src("popup.css"), postcss([cssnano()]), dest("dist")], cb);
+}
+
+// Copy HTML and manifest
+function copy(cb) {
+  pump([src(["popup.html", "manifest.json", "*.png"]), dest("dist")], cb);
+}
+
+// Update references in HTML and manifest to minified files
+function updateRefs(cb) {
   pump(
     [
-      src("popup.css"),
-      postcss([cssnano()]),
-      zip("PageSumry.zip", { append: true }),
-      dest("."),
+      src(["dist/popup.html", "dist/manifest.json"]),
+      replace("popup.css", "popup.css"), // No change needed as we're keeping original filenames
+      dest("dist"),
     ],
     cb
   );
 }
 
-// Copy other necessary files including icons
-function copyOther(cb) {
-  pump(
-    [
-      src(["popup.html", "manifest.json", "icon128.png"]),
-      zip("PageSumry.zip", { append: true }),
-      dest(".chromestore"),
-    ],
-    cb
-  );
+// Zip the distribution folder
+function zipDist(cb) {
+  pump([src("dist/**"), zip("PageSumry.zip"), dest(".chromestore")], cb);
 }
 
 // Default task
-exports.default = series(js, css, copyOther);
+exports.default = series(parallel(js, css, copy), updateRefs, zipDist);
