@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PageSumry",
   "version": "1.0",
-  "description": "Summarises the current webpage in a reader-friendly way whilst also enabling users to ask any questions regarding that webpage",
+  "description": "PageSumry: AI web page summarizer & question answerer. Get instant article summaries and answers. Save time reading online!",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],
   "action": {
