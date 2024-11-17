@@ -51,7 +51,7 @@ function css(cb) {
 
 // Copy HTML and manifest
 function copy(cb) {
-  pump([src(["popup.html", "manifest.json", "*.png"]), dest("dist")], cb);
+  pump([src(["popup.html", "manifest.json", "icons/*.png"]), dest("dist")], cb);
 }
 
 // Update references in HTML and manifest to minified files
