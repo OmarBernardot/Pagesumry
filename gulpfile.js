@@ -1,75 +1,41 @@
-const { src, dest, series, parallel } = require("gulp");
-const uglifyjs = require("uglify-es");
-const composer = require("gulp-uglify/composer");
-const pump = require("pump");
-const postcss = require("gulp-postcss");
-const cssnano = require("cssnano");
-const replace = require("gulp-replace");
+const gulp = require("gulp");
+const zip = require("gulp-zip");
+const del = require("del");
+const { exec } = require("child_process");
 
-// We'll use a dynamic import for gulp-zip
-let zip;
-import("gulp-zip").then((module) => {
-  zip = module.default;
+// Clean dist folder
+gulp.task("clean", () => del(["dist"]));
+
+// Build React app
+gulp.task("build-react", (cb) => {
+  exec("npm run build", (err, stdout, stderr) => {
+    console.log(stdout);
+    console.error(stderr);
+    cb(err);
+  });
 });
 
-const minify = composer(uglifyjs, console);
+// Copy necessary files
+gulp.task("copy", () => {
+  return gulp
+    .src(
+      [
+        "public/manifest.json",
+        "public/background.js",
+        "public/content.js",
+        "public/icon16.png",
+        "public/icon48.png",
+        "public/icon128.png",
+      ],
+      { base: "public" }
+    )
+    .pipe(gulp.dest("dist"));
+});
 
-// Minify and obfuscate JavaScript using uglify-es
-function js(cb) {
-  pump(
-    [
-      src(["popup.js", "background.js", "content.js"]),
-      minify({
-        mangle: true,
-        compress: {
-          dead_code: true,
-          drop_debugger: true,
-          conditionals: true,
-          evaluate: true,
-          booleans: true,
-          loops: true,
-          unused: true,
-          hoist_funs: true,
-          keep_fargs: false,
-          hoist_vars: true,
-          if_return: true,
-          join_vars: true,
-          side_effects: true,
-          warnings: false,
-        },
-      }),
-      dest("dist"),
-    ],
-    cb
-  );
-}
-
-// Minify CSS
-function css(cb) {
-  pump([src("popup.css"), postcss([cssnano()]), dest("dist")], cb);
-}
-
-// Copy HTML and manifest
-function copy(cb) {
-  pump([src(["popup.html", "manifest.json", "icons/*.png"]), dest("dist")], cb);
-}
-
-// Update references in HTML and manifest to minified files
-function updateRefs(cb) {
-  pump(
-    [
-      src(["dist/popup.html", "dist/manifest.json"]),
-      replace("popup.css", "popup.css"), // No change needed as we're keeping original filenames
-      dest("dist"),
-    ],
-    cb
-  );
-}
-
-// Zip the distribution folder
-function zipDist(cb) {
-  pump([src("dist/**"), zip("PageSumry.zip"), dest(".chromestore")], cb);
-}
+// Zip the dist folder
+gulp.task("zip", () => {
+  return gulp.src("dist/**").pipe(zip("extension.zip")).pipe(gulp.dest("./"));
+});
 
 // Default task
-exports.default = series(parallel(js, css, copy), updateRefs, zipDist);
+gulp.task("default", gulp.series("clean", "build-react", "copy", "zip"));

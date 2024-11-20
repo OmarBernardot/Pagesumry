@@ -57,46 +57,38 @@ async function callAIAPI(action, content, question = null) {
   }
 }
 
-function extractMainContent(html) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-
-  // Remove script and style elements
-  const scripts = doc.getElementsByTagName("script");
-  const styles = doc.getElementsByTagName("style");
-  Array.from(scripts).forEach((script) => script.remove());
-  Array.from(styles).forEach((style) => style.remove());
-
-  // Get text from body
-  return doc.body.innerText;
-}
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "summarize" || request.action === "ask") {
-    fetch(request.url)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch page content: ${response.status} ${response.statusText}`
-          );
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        { action: "getPageContent" },
+        function (response) {
+          if (chrome.runtime.lastError) {
+            sendResponse({
+              error:
+                "Error getting page content: " +
+                chrome.runtime.lastError.message,
+            });
+            return;
+          }
+
+          const content = response.content;
+          callAIAPI(request.action, content, request.question)
+            .then((data) => {
+              if (request.action === "summarize") {
+                sendResponse({ summary: data.summary });
+              } else {
+                sendResponse({ answer: data.answer });
+              }
+            })
+            .catch((error) => {
+              console.error("Error in background script:", error);
+              sendResponse({ error: error.message });
+            });
         }
-        return response.text();
-      })
-      .then((html) => {
-        const mainContent = extractMainContent(html);
-        return callAIAPI(request.action, mainContent, request.question);
-      })
-      .then((data) => {
-        if (request.action === "summarize") {
-          sendResponse({ summary: data.summary });
-        } else {
-          sendResponse({ answer: data.answer });
-        }
-      })
-      .catch((error) => {
-        console.error("Error in background script:", error);
-        sendResponse({ error: error.message });
-      });
+      );
+    });
+    return true; // Indicates that the response is sent asynchronously
   }
-  return true; // Indicates that the response is sent asynchronously
 });
