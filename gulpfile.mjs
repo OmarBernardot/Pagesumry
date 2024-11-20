@@ -12,11 +12,20 @@ export const clean = () => deleteAsync(["dist"]);
 
 // Build React app
 export const buildReact = (cb) => {
-  exec("npm run build", (err, stdout, stderr) => {
-    console.log(stdout);
-    console.error(stderr);
-    cb(err);
-  });
+  exec(
+    "npm run build",
+    {
+      env: {
+        ...process.env,
+        POSTCSS_CONFIG: path.join(__dirname, "postcss.config.cjs"),
+      },
+    },
+    (err, stdout, stderr) => {
+      console.log(stdout);
+      console.error(stderr);
+      cb(err);
+    }
+  );
 };
 
 // Copy necessary files
