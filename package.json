@@ -1,6 +1,7 @@
 {
   "name": "pagesumry-extension",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "dependencies": {
     "@radix-ui/react-scroll-area": "^1.2.1",
@@ -30,6 +31,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:extension": "gulp --gulpfile gulpfile.mjs"
   }
 }
